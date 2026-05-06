@@ -4757,6 +4757,11 @@
             class="ladi-element ladi-animation-hidden"
           >
             <form autocomplete="off" method="post" class="ladi-form">
+              <input type="hidden" name="access_key" value="01402cd7-549b-4e41-bb53-8aee71c3d6e2">
+              <input type="hidden" name="subject" value="🔔 Có khách mới xác nhận dự Đám Cưới!">
+              <input type="hidden" name="from_name" value="Thiệp Cưới Minh Quân">
+
+              <div id="BUTTON2" class="ladi-element ladi-animation-hidden" style="top: 343px;">
               <div id="BUTTON2" class="ladi-element ladi-animation-hidden">
                 <div class="ladi-button ladi-transition">
                   <div class="ladi-button-background ladi-lazyload"></div>
@@ -4808,7 +4813,7 @@
                   <div class="ladi-form-item">
                     <select
                       tabindex="3"
-                      name="form_item7"
+                      name="Ban_se_den_chu"
                       class="ladi-form-control ladi-form-control-select"
                       data-selected=""
                     >
@@ -4829,7 +4834,7 @@
                   <div class="ladi-form-item">
                     <select
                       tabindex="4"
-                      name="form_item8"
+                      name="Di_cung_ai"
                       class="ladi-form-control ladi-form-control-select"
                       data-selected=""
                     >
@@ -4848,7 +4853,7 @@
                   <div class="ladi-form-item">
                     <select
                       tabindex="5"
-                      name="form_item9"
+                      name="Menu_su_dung"
                       class="ladi-form-control ladi-form-control-select"
                       data-selected=""
                     >
@@ -6036,11 +6041,6 @@
         run();
       })();
     </script>
-    <script
-      type="text/javascript"
-      defer=""
-      src="./wedding-template_files/ladipage.formdata.min.js"
-    ></script>
     <script id="script_animation_fallback" type="text/javascript">
       (function () {
         function isVisiblePageElement(element) {
@@ -6606,5 +6606,53 @@
         }
       });
     </script>
+    <script>
+document.addEventListener("DOMContentLoaded", function() {
+  const form = document.getElementById('my-wedding-form');
+  const btnText = document.querySelector('#BUTTON_TEXT2 .ladi-headline');
+  
+  // Lắng nghe sự kiện bấm nút submit ẩn của LadiPage
+  document.querySelector('#BUTTON2').addEventListener('click', function() {
+     document.querySelector('#FORM2 button[type="submit"]').click();
+  });
+
+  form.addEventListener('submit', function(e) {
+      e.preventDefault(); // Chặn việc tự động chuyển trang
+      
+      const originalText = btnText.innerText;
+      btnText.innerText = "ĐANG GỬI..."; // Đổi chữ lúc đang xử lý
+
+      const formData = new FormData(form);
+
+      fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          body: formData
+      })
+      .then(async (response) => {
+          let json = await response.json();
+          if (response.status == 200) {
+              // Bật Popup cảm ơn lên
+              const popup = document.getElementById('POPUP1');
+              popup.classList.add('selected');
+              popup.style.display = 'block';
+              popup.classList.remove('ladi-animation-hidden');
+              
+              // Xoá trắng các ô đã điền
+              form.reset();
+          } else {
+              console.log(response);
+              alert("Có lỗi xảy ra, vui lòng thử lại sau!");
+          }
+      })
+      .catch(error => {
+          console.log(error);
+          alert("Lỗi kết nối mạng, vui lòng thử lại!");
+      })
+      .then(function() {
+          btnText.innerText = originalText; // Trả lại chữ cũ cho nút bấm
+      });
+  });
+});
+</script>
   </body>
 </html>
