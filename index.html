@@ -4924,14 +4924,15 @@
                     <select
                       tabindex="3"
                       name="attendance"
+                      required=""
                       class="ladi-form-control ladi-form-control-select"
                       data-selected=""
                     >
                       <option value="">Bạn sẽ đến chứ?</option>
-                      <option value="Mình chắc chắn sẽ đến">
+                      <option value="attending">
                         Mình chắc chắn sẽ đến
                       </option>
-                      <option value="Xin lỗi mình bận rồi!">
+                      <option value="not_attending">
                         Xin lỗi mình bận rồi!
                       </option>
                     </select>
@@ -4950,10 +4951,10 @@
                     >
                       <option value="">Bạn tham dự cùng ai?</option>
                       <option value="0">0 người</option>
-                      <option value="1 người">1 người</option>
-                      <option value="2 người">2 người</option>
-                      <option value="3 người">3 người</option>
-                      <option value="4 người">4 người</option>
+                      <option value="1">1 người</option>
+                      <option value="2">2 người</option>
+                      <option value="3">3 người</option>
+                      <option value="4">4 người</option>
                     </select>
                   </div>
                 </div>
@@ -4965,12 +4966,13 @@
                     <select
                       tabindex="5"
                       name="menu"
+                      required=""
                       class="ladi-form-control ladi-form-control-select"
                       data-selected=""
                     >
                       <option value="">Thực đơn bạn sẽ sử dụng</option>
-                      <option value="Thông thường">Thông thường</option>
-                      <option value="Món chay">Món chay</option>
+                      <option value="regular">Thông thường</option>
+                      <option value="vegetarian">Món chay</option>
                     </select>
                   </div>
                 </div>
@@ -6637,10 +6639,48 @@ document.addEventListener("DOMContentLoaded", function() {
   const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby0p4T6N21knWwfLMaDMIZb3SorfNaq8g2ODSPlCaUZCRezG7M-nD8hsF8bjnzDeGn_/exec';
   const form = document.getElementById('my-wedding-form');
   const btnText = document.querySelector('#BUTTON_TEXT2 .ladi-headline');
+  const attendanceSelect = form.querySelector('[name="attendance"]');
+  const guestCountSelect = form.querySelector('[name="guest_count"]');
+  const menuSelect = form.querySelector('[name="menu"]');
+  const sheetValueMap = {
+      attendance: {
+          attending: 'Có tham dự',
+          not_attending: 'Không tham dự'
+      },
+      guest_count: {
+          '0': 'Đi một mình',
+          '1': 'Đi cùng 1 người',
+          '2': 'Đi cùng 2 người',
+          '3': 'Đi cùng 3 người',
+          '4': 'Đi cùng 4 người'
+      },
+      menu: {
+          regular: 'Thực đơn thông thường',
+          vegetarian: 'Thực đơn chay'
+      }
+  };
+
+  function syncAttendanceFields() {
+      const isNotGoing = attendanceSelect.value === 'not_attending';
+
+      guestCountSelect.disabled = isNotGoing;
+      menuSelect.disabled = isNotGoing;
+      menuSelect.required = !isNotGoing;
+
+      if (isNotGoing) {
+          guestCountSelect.value = '';
+          menuSelect.value = '';
+      }
+  }
+
+  attendanceSelect.addEventListener('change', syncAttendanceFields);
+  syncAttendanceFields();
   
   // Lắng nghe sự kiện bấm nút submit ẩn của LadiPage
   document.querySelector('#BUTTON2').addEventListener('click', function() {
-     document.querySelector('#FORM2 button[type="submit"]').click();
+     if (form.reportValidity()) {
+       document.querySelector('#FORM2 button[type="submit"]').click();
+     }
   });
 
   form.addEventListener('submit', function(e) {
@@ -6655,12 +6695,15 @@ document.addEventListener("DOMContentLoaded", function() {
       btnText.innerText = "ĐANG GỬI..."; // Đổi chữ lúc đang xử lý
 
       const formData = new FormData(form);
+      const attendanceValue = formData.get('attendance') || '';
+      const guestCountValue = attendanceValue === 'not_attending' ? '' : (formData.get('guest_count') || '0');
+      const menuValue = attendanceValue === 'not_attending' ? '' : (formData.get('menu') || '');
       const payload = {
           guest_name: formData.get('guest_name') || '',
           message: formData.get('message') || '',
-          attendance: formData.get('attendance') || '',
-          guest_count: formData.get('guest_count') || '0',
-          menu: formData.get('menu') || ''
+          attendance: sheetValueMap.attendance[attendanceValue] || '',
+          guest_count: attendanceValue === 'not_attending' ? 'Không tham dự' : (sheetValueMap.guest_count[guestCountValue] || ''),
+          menu: attendanceValue === 'not_attending' ? 'Không tham dự' : (sheetValueMap.menu[menuValue] || '')
       };
 
       fetch(GOOGLE_SCRIPT_URL, {
@@ -6677,6 +6720,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
           // Xoá trắng các ô đã điền
           form.reset();
+          syncAttendanceFields();
       })
       .catch(error => {
           console.log(error);
