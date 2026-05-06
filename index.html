@@ -85,6 +85,119 @@
       href="./wedding-template_files/ladipagev3.min.js"
       as="script"
     />
+    <style id="hide_ladipage_branding" type="text/css">
+      [style*="source/v3/by/ladipage.svg"],
+      [style*="/by/ladipage.svg"] {
+        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        visibility: hidden !important;
+      }
+    </style>
+    <script id="remove_ladipage_branding_early" type="text/javascript">
+      (function () {
+        var brandingAsset = "/by/ladipage.svg";
+
+        function containsBrandingAsset(value) {
+          return String(value || "").indexOf(brandingAsset) !== -1;
+        }
+
+        function removeBrandingStyleRules() {
+          Array.prototype.slice.call(document.styleSheets).forEach(function (sheet) {
+            var rules;
+            try {
+              rules = sheet.cssRules;
+            } catch (error) {
+              return;
+            }
+
+            if (!rules) return;
+
+            for (var i = rules.length - 1; i >= 0; i -= 1) {
+              if (containsBrandingAsset(rules[i].cssText)) {
+                sheet.deleteRule(i);
+              }
+            }
+          });
+        }
+
+        function removeBrandingNodes(root) {
+          var nodes = root && root.querySelectorAll ? root.querySelectorAll("*") : [];
+          Array.prototype.slice.call(nodes).forEach(function (node) {
+            var style = window.getComputedStyle ? window.getComputedStyle(node) : null;
+            var inlineStyle = node.getAttribute && node.getAttribute("style");
+            var rect = node.getBoundingClientRect ? node.getBoundingClientRect() : null;
+            var isGeneratedLadiBadge =
+              style &&
+              rect &&
+              style.position === "fixed" &&
+              Math.abs(rect.width - 140) <= 4 &&
+              Math.abs(rect.height - 30) <= 4 &&
+              parseInt(style.left, 10) === 10 &&
+              parseInt(style.zIndex, 10) >= 1000000000;
+
+            if (
+              containsBrandingAsset(inlineStyle) ||
+              (style && containsBrandingAsset(style.backgroundImage)) ||
+              isGeneratedLadiBadge
+            ) {
+              node.remove();
+            }
+          });
+        }
+
+        function cleanBranding() {
+          removeBrandingStyleRules();
+          removeBrandingNodes(document);
+        }
+
+        function wrapDomInsert(methodName) {
+          var original = Node.prototype[methodName];
+          Node.prototype[methodName] = function () {
+            var node = arguments[0];
+            var result = original.apply(this, arguments);
+
+            if (node) {
+              if (
+                node.textContent &&
+                containsBrandingAsset(node.textContent) &&
+                node.parentNode
+              ) {
+                node.remove();
+              }
+              cleanBranding();
+            }
+
+            return result;
+          };
+        }
+
+        wrapDomInsert("appendChild");
+        wrapDomInsert("insertBefore");
+
+        if (window.CSSStyleSheet && CSSStyleSheet.prototype.insertRule) {
+          var originalInsertRule = CSSStyleSheet.prototype.insertRule;
+          CSSStyleSheet.prototype.insertRule = function (rule, index) {
+            if (containsBrandingAsset(rule)) return -1;
+            return originalInsertRule.call(this, rule, index);
+          };
+        }
+
+        new MutationObserver(cleanBranding).observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ["class", "style"],
+          childList: true,
+          subtree: true
+        });
+
+        cleanBranding();
+        document.addEventListener("DOMContentLoaded", cleanBranding);
+        window.addEventListener("load", cleanBranding);
+        setTimeout(cleanBranding, 50);
+        setTimeout(cleanBranding, 250);
+        setTimeout(cleanBranding, 1000);
+      })();
+    </script>
     <style id="style_ladi" type="text/css">
       a,
       abbr,
@@ -2179,7 +2292,7 @@
           url("https://i.imgur.com/qpbyMeu.jpeg");
         background-size: cover;
         background-origin: content-box;
-        background-position: center center;
+        background-position: 53% center;
         background-repeat: no-repeat;
         background-attachment: scroll;
       }
@@ -4759,10 +4872,6 @@
             style="height: 383px;"
           >
             <form autocomplete="off" method="post" class="ladi-form" id="my-wedding-form">
-              <input type="hidden" name="access_key" value="01402cd7-549b-4e41-bb53-8aee71c3d6e2">
-              <input type="hidden" name="subject" value="🔔 Có khách mới xác nhận dự Đám Cưới!">
-              <input type="hidden" name="from_name" value="Thiệp Cưới Minh Quân">
-
               <div id="BUTTON2" class="ladi-element ladi-animation-hidden" style="top: 343px;">
                 <div class="ladi-button ladi-transition">
                   <div class="ladi-button-background ladi-lazyload"></div>
@@ -4783,7 +4892,7 @@
                     <input
                       autocomplete="off"
                       tabindex="1"
-                      name="name"
+                      name="guest_name"
                       required=""
                       class="ladi-form-control"
                       type="text"
@@ -4814,7 +4923,7 @@
                   <div class="ladi-form-item">
                     <select
                       tabindex="3"
-                      name="Ban_se_den_chu"
+                      name="attendance"
                       class="ladi-form-control ladi-form-control-select"
                       data-selected=""
                     >
@@ -4835,11 +4944,12 @@
                   <div class="ladi-form-item">
                     <select
                       tabindex="4"
-                      name="Di_cung_ai"
+                      name="guest_count"
                       class="ladi-form-control ladi-form-control-select"
                       data-selected=""
                     >
                       <option value="">Bạn tham dự cùng ai?</option>
+                      <option value="0">0 người</option>
                       <option value="1 người">1 người</option>
                       <option value="2 người">2 người</option>
                       <option value="3 người">3 người</option>
@@ -4854,7 +4964,7 @@
                   <div class="ladi-form-item">
                     <select
                       tabindex="5"
-                      name="Menu_su_dung"
+                      name="menu"
                       class="ladi-form-control ladi-form-control-select"
                       data-selected=""
                     >
@@ -5036,6 +5146,14 @@
           <div id="POPUP1" class="ladi-element">
             <div class="ladi-popup">
               <div class="ladi-popup-background"></div>
+              <button
+                type="button"
+                class="thankyou-close-btn"
+                aria-label="Đóng"
+                onclick="closeThankyouModal()"
+              >
+                &times;
+              </button>
               <div id="IMAGE35" class="ladi-element">
                 <div class="ladi-image">
                   <div class="ladi-image-background ladi-lazyload"></div>
@@ -6143,6 +6261,79 @@
       })();
     </script>
     <style>
+      [id*="watermark" i][style*="fixed"],
+      [class*="watermark" i][style*="fixed"],
+      [id*="powered" i][style*="fixed"],
+      [class*="powered" i][style*="fixed"],
+      [href*="ladipage.com"][style*="fixed"],
+      [src*="ladipage"][style*="fixed"] {
+        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        visibility: hidden !important;
+      }
+    </style>
+    <script>
+      (function removeLadiPageWatermark() {
+        function isBottomFixedBranding(element) {
+          if (!element || element === document.body || element === document.documentElement) return false;
+
+          var text = (element.textContent || '').toLowerCase();
+          var attrs = [
+            element.id,
+            element.className,
+            element.getAttribute('href'),
+            element.getAttribute('src'),
+            element.getAttribute('style'),
+            element.getAttribute('aria-label'),
+            element.getAttribute('title'),
+            element.getAttribute('alt')
+          ].join(' ').toLowerCase();
+
+          if (text.indexOf('powered by') !== -1 && text.indexOf('ladipage') !== -1) return true;
+
+	          var style = window.getComputedStyle(element);
+	          if (style.position !== 'fixed' && style.position !== 'sticky') return false;
+	
+	          var rect = element.getBoundingClientRect();
+	          if (
+	            style.position === 'fixed' &&
+	            Math.abs(rect.width - 140) <= 4 &&
+	            Math.abs(rect.height - 30) <= 4 &&
+	            parseInt(style.left, 10) === 10 &&
+	            parseInt(style.zIndex, 10) >= 1000000000
+	          ) {
+	            return true;
+	          }
+
+	          var isBottomBadge = rect.width <= 360 && rect.height <= 120 && rect.bottom >= window.innerHeight - 140;
+	          return isBottomBadge && (
+	            attrs.indexOf('ladipage') !== -1 ||
+            attrs.indexOf('watermark') !== -1 ||
+            attrs.indexOf('powered') !== -1
+          );
+        }
+
+        function removeBadge() {
+          Array.prototype.slice.call(document.querySelectorAll('body *')).forEach(function(element) {
+            if (isBottomFixedBranding(element)) {
+              element.remove();
+            }
+          });
+        }
+
+        removeBadge();
+        window.addEventListener('load', removeBadge);
+        setTimeout(removeBadge, 500);
+        setTimeout(removeBadge, 1500);
+
+        new MutationObserver(removeBadge).observe(document.documentElement, {
+          childList: true,
+          subtree: true
+        });
+      })();
+    </script>
+    <style>
       /* ── Gift modal open/close animations ── */
       @keyframes giftModalIn {
         from { opacity: 0; transform: scale(0.88) translateY(24px); }
@@ -6235,6 +6426,55 @@
       #gift-overlay.gift-overlay-leaving {
         animation: giftOverlayOut 0.25s ease forwards;
       }
+
+      body.modal-scroll-locked {
+        overflow: hidden !important;
+        touch-action: none;
+      }
+      #backdrop-popup.thankyou-backdrop {
+        display: block;
+        background: rgba(0, 0, 0, 0.72);
+        animation: giftOverlayIn 0.3s ease forwards;
+      }
+      #backdrop-popup.thankyou-backdrop-leaving {
+        animation: giftOverlayOut 0.25s ease forwards;
+      }
+      #POPUP1.thankyou-modal-entering {
+        animation: giftModalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      }
+      #POPUP1.thankyou-modal-leaving {
+        animation: giftModalOut 0.25s ease forwards;
+      }
+      #POPUP1 .ladi-animation > .ladi-group,
+      #POPUP1 .ladi-animation > .ladi-headline,
+      #POPUP1 .ladi-animation > .ladi-paragraph,
+      #POPUP1 .ladi-animation > .ladi-image,
+      #POPUP1 .ladi-animation > .ladi-box {
+        -webkit-animation-fill-mode: both;
+        animation-fill-mode: both;
+      }
+      #POPUP1 .thankyou-close-btn {
+        position: absolute;
+        top: 14px;
+        right: 16px;
+        z-index: 1000;
+        width: 34px;
+        height: 34px;
+        border: 0;
+        background: transparent;
+        color: rgb(131, 95, 45);
+        cursor: pointer;
+        font-family: Arial, sans-serif;
+        font-size: 28px;
+        line-height: 32px;
+        padding: 0;
+        text-align: center;
+      }
+      #POPUP1 .thankyou-close-btn:hover,
+      #POPUP1 .thankyou-close-btn:focus {
+        background: transparent;
+        outline: none;
+      }
     </style>
     <div id="gift-overlay"></div>
     <script>
@@ -6288,7 +6528,7 @@
         popup.classList.add('gift-modal-leaving');
 
         // Hide both after animation completes (longest duration is 0.25s)
-        popup.addEventListener('animationend', function handler() {
+        popup.addEventListener('animationend', function handler(event) {
           popup.removeEventListener('animationend', handler);
           popup.classList.remove('selected', 'gift-modal-leaving');
           popup.style.display = 'none';
@@ -6307,14 +6547,94 @@
       document.addEventListener('click', function(e) {
         if (
           e.target.id === 'gift-overlay' ||
-          e.target.classList.contains('ladi-popup-background')
+          (e.target.classList.contains('ladi-popup-background') && e.target.closest('#POPUP2'))
         ) {
           closeGiftModal();
         }
       });
     </script>
     <script>
+      function _thankyouBlockScroll(e) { e.preventDefault(); }
+
+      function lockThankyouScroll() {
+        document.documentElement.style.overflow = 'hidden';
+        document.body.classList.add('modal-scroll-locked');
+        window.addEventListener('wheel', _thankyouBlockScroll, { passive: false });
+        window.addEventListener('touchmove', _thankyouBlockScroll, { passive: false });
+      }
+
+      function unlockThankyouScroll() {
+        document.documentElement.style.overflow = '';
+        document.body.classList.remove('modal-scroll-locked');
+        window.removeEventListener('wheel', _thankyouBlockScroll);
+        window.removeEventListener('touchmove', _thankyouBlockScroll);
+      }
+
+      function restartThankyouAnimations(popup) {
+        popup.querySelectorAll('.ladi-animation, .ladi-animation-hidden').forEach(function(el) {
+          el.classList.remove('ladi-animation');
+          el.classList.add('ladi-animation-hidden');
+          void el.offsetWidth;
+          el.classList.add('ladi-animation');
+          el.classList.remove('ladi-animation-hidden');
+        });
+      }
+
+      function openThankyouModal() {
+        var popup = document.getElementById('POPUP1');
+        var backdrop = document.getElementById('backdrop-popup');
+        if (!popup || !backdrop) return;
+
+        lockThankyouScroll();
+
+        backdrop.classList.remove('thankyou-backdrop-leaving');
+        backdrop.style.display = 'block';
+        backdrop.classList.add('thankyou-backdrop');
+        popup.classList.remove('thankyou-modal-leaving');
+        popup.classList.add('selected');
+        popup.style.display = 'block';
+        popup.classList.remove('ladi-animation-hidden');
+
+        void popup.offsetWidth;
+        popup.classList.add('thankyou-modal-entering');
+        restartThankyouAnimations(popup);
+      }
+
+      function closeThankyouModal() {
+        var popup = document.getElementById('POPUP1');
+        var backdrop = document.getElementById('backdrop-popup');
+        if (!popup || !backdrop || popup.style.display === 'none') return;
+
+        backdrop.classList.add('thankyou-backdrop-leaving');
+        popup.classList.remove('thankyou-modal-entering');
+        popup.classList.add('thankyou-modal-leaving');
+
+        popup.addEventListener('animationend', function handler(event) {
+          if (event.target !== popup) return;
+          popup.removeEventListener('animationend', handler);
+          popup.classList.remove('selected', 'thankyou-modal-leaving');
+          popup.style.display = 'none';
+          backdrop.classList.remove('thankyou-backdrop', 'thankyou-backdrop-leaving');
+          backdrop.style.display = 'none';
+          unlockThankyouScroll();
+        });
+      }
+
+      document.addEventListener('click', function(e) {
+        if (e.target.id === 'backdrop-popup') {
+          closeThankyouModal();
+        }
+      });
+
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          closeThankyouModal();
+        }
+      });
+    </script>
+    <script>
 document.addEventListener("DOMContentLoaded", function() {
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby0p4T6N21knWwfLMaDMIZb3SorfNaq8g2ODSPlCaUZCRezG7M-nD8hsF8bjnzDeGn_/exec';
   const form = document.getElementById('my-wedding-form');
   const btnText = document.querySelector('#BUTTON_TEXT2 .ladi-headline');
   
@@ -6325,31 +6645,38 @@ document.addEventListener("DOMContentLoaded", function() {
 
   form.addEventListener('submit', function(e) {
       e.preventDefault(); // Chặn việc tự động chuyển trang
+
+      if (!GOOGLE_SCRIPT_URL.startsWith('https://script.google.com/macros/s/')) {
+          alert("Vui lòng cấu hình Google Apps Script URL trước khi gửi!");
+          return;
+      }
       
       const originalText = btnText.innerText;
       btnText.innerText = "ĐANG GỬI..."; // Đổi chữ lúc đang xử lý
 
       const formData = new FormData(form);
+      const payload = {
+          guest_name: formData.get('guest_name') || '',
+          message: formData.get('message') || '',
+          attendance: formData.get('attendance') || '',
+          guest_count: formData.get('guest_count') || '0',
+          menu: formData.get('menu') || ''
+      };
 
-      fetch('https://api.web3forms.com/submit', {
+      fetch(GOOGLE_SCRIPT_URL, {
           method: 'POST',
-          body: formData
+          mode: 'no-cors',
+          headers: {
+              'Content-Type': 'text/plain;charset=utf-8'
+          },
+          body: JSON.stringify(payload)
       })
-      .then(async (response) => {
-          let json = await response.json();
-          if (response.status == 200) {
-              // Bật Popup cảm ơn lên
-              const popup = document.getElementById('POPUP1');
-              popup.classList.add('selected');
-              popup.style.display = 'block';
-              popup.classList.remove('ladi-animation-hidden');
-              
-              // Xoá trắng các ô đã điền
-              form.reset();
-          } else {
-              console.log(response);
-              alert("Có lỗi xảy ra, vui lòng thử lại sau!");
-          }
+      .then(() => {
+          // Bật Popup cảm ơn lên
+          openThankyouModal();
+
+          // Xoá trắng các ô đã điền
+          form.reset();
       })
       .catch(error => {
           console.log(error);
