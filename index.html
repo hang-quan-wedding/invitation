@@ -6693,10 +6693,67 @@
         document.body.classList.add("has-guest-name");
 
         var guestNameWrapper = document.getElementById("HEADLINE_GUEST_NAME");
-        if (guestNameWrapper) {
+        if (!guestNameWrapper) return;
+
+        function runGuestNameAnimation() {
+          if (guestNameWrapper.classList.contains("ladi-animation")) return;
+
           guestNameWrapper.classList.add("ladi-animation");
-          guestNameWrapper.classList.remove("ladi-animation-hidden");
+          var animationTarget = guestNameWrapper.firstElementChild || guestNameWrapper;
+          var styles = window.getComputedStyle(animationTarget);
+          var delay = 0;
+
+          if (styles.animationDelay) {
+            delay = styles.animationDelay
+              .split(",")
+              .map(function(value) {
+                value = value.trim();
+                return value.endsWith("ms")
+                  ? parseFloat(value)
+                  : parseFloat(value) * 1000;
+              })
+              .reduce(function(max, value) {
+                return Math.max(max, isNaN(value) ? 0 : value);
+              }, 0);
+          }
+
+          window.setTimeout(function() {
+            guestNameWrapper.classList.remove("ladi-animation-hidden");
+          }, delay);
         }
+
+        if ("IntersectionObserver" in window) {
+          var guestNameObserver = new IntersectionObserver(
+            function(entries) {
+              entries.forEach(function(entry) {
+                if (!entry.isIntersecting) return;
+                guestNameObserver.unobserve(entry.target);
+                runGuestNameAnimation();
+              });
+            },
+            {
+              root: null,
+              rootMargin: "0px 0px -8% 0px",
+              threshold: 0.01,
+            },
+          );
+
+          guestNameObserver.observe(guestNameWrapper);
+          return;
+        }
+
+        function checkGuestNameVisibility() {
+          var rect = guestNameWrapper.getBoundingClientRect();
+          if (rect.top >= window.innerHeight * 0.92 || rect.bottom <= 0) return;
+
+          window.removeEventListener("scroll", checkGuestNameVisibility);
+          window.removeEventListener("resize", checkGuestNameVisibility);
+          runGuestNameAnimation();
+        }
+
+        window.addEventListener("scroll", checkGuestNameVisibility, { passive: true });
+        window.addEventListener("resize", checkGuestNameVisibility);
+        checkGuestNameVisibility();
       });
     </script>
     <script>
