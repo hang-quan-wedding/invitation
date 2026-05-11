@@ -6679,11 +6679,23 @@
     </script>
     <script>
       document.addEventListener("DOMContentLoaded", function() {
+        var headline32WordMap = {
+          "1": "chúng mình",
+          "2": "chúng em",
+          "3": "chúng con",
+        };
+        var searchParams = new URLSearchParams(window.location.search);
+        var headline32Element = document.querySelector("#HEADLINE32 .ladi-headline");
+        var headline32Word = headline32WordMap[searchParams.get("config")] || "chúng tôi";
+
+        if (headline32Element) {
+          headline32Element.innerHTML = "đến dự bữa tiệc chung vui<br />cùng " + headline32Word;
+        }
+
         var guestNameElement = document.querySelector("#HEADLINE_GUEST_NAME .ladi-headline");
         if (!guestNameElement) return;
 
-        var guestName = new URLSearchParams(window.location.search)
-          .get("guest");
+        var guestName = searchParams.get("guest");
 
         guestName = (guestName || "").replace(/\s+/g, " ").trim();
 
