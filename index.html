@@ -2449,6 +2449,7 @@
       #HEADLINE8.ladi-animation > .ladi-headline,
       #HEADLINE9.ladi-animation > .ladi-headline,
       #HEADLINE31.ladi-animation > .ladi-headline,
+      #HEADLINE_GUEST_NAME.ladi-animation > .ladi-headline,
       #HEADLINE32.ladi-animation > .ladi-headline,
       #HEADLINE35.ladi-animation > .ladi-headline,
       #HEADLINE38.ladi-animation > .ladi-headline,
@@ -2838,6 +2839,7 @@
         text-align: center;
       }
       #HEADLINE32,
+      #HEADLINE_GUEST_NAME,
       #HEADLINE33,
       #HEADLINE34,
       #HEADLINE38,
@@ -2848,6 +2850,44 @@
       #HEADLINE32 {
         top: 384.901px;
         left: 16px;
+      }
+      #HEADLINE_GUEST_NAME {
+        display: none;
+        top: 382.901px;
+        left: 16px;
+      }
+      body.has-guest-name #HEADLINE_GUEST_NAME {
+        display: block;
+      }
+      body.has-guest-name #HEADLINE32 {
+        top: 426.901px;
+      }
+      body.has-guest-name #HEADLINE33 {
+        top: 506.901px;
+      }
+      body.has-guest-name #HEADLINE34 {
+        top: 632.901px;
+      }
+      body.has-guest-name #HEADLINE35 {
+        top: 550.901px;
+      }
+      body.has-guest-name #HEADLINE82 {
+        top: 702.337px;
+      }
+      body.has-guest-name #HEADLINE83 {
+        top: 719.337px;
+      }
+      body.has-guest-name #GROUP31,
+      body.has-guest-name #GROUP32 {
+        top: 746.337px;
+      }
+      #HEADLINE_GUEST_NAME > .ladi-headline {
+        font-family: TESQSSRUdVTEFSLlRURg;
+        font-size: 24px;
+        line-height: 1.2;
+        color: rgb(131, 95, 45);
+        text-align: center;
+        overflow-wrap: anywhere;
       }
       #HEADLINE32 > .ladi-headline {
         font-family: TESQSSRUdVTEFSLlRURg;
@@ -4446,6 +4486,9 @@
           </div>
           <div id="HEADLINE31" class="ladi-element ladi-animation-hidden">
             <h3 class="ladi-headline ladi-lazyload">Thân mời</h3>
+          </div>
+          <div id="HEADLINE_GUEST_NAME" class="ladi-element ladi-animation-hidden">
+            <h3 class="ladi-headline ladi-lazyload"></h3>
           </div>
           <div id="HEADLINE32" class="ladi-element ladi-animation-hidden">
             <h3 class="ladi-headline ladi-lazyload">
@@ -6631,6 +6674,28 @@
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
           closeThankyouModal();
+        }
+      });
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        var guestNameElement = document.querySelector("#HEADLINE_GUEST_NAME .ladi-headline");
+        if (!guestNameElement) return;
+
+        var guestName = new URLSearchParams(window.location.search)
+          .get("guest");
+
+        guestName = (guestName || "").replace(/\s+/g, " ").trim();
+
+        if (!guestName) return;
+
+        guestNameElement.textContent = guestName;
+        document.body.classList.add("has-guest-name");
+
+        var guestNameWrapper = document.getElementById("HEADLINE_GUEST_NAME");
+        if (guestNameWrapper) {
+          guestNameWrapper.classList.add("ladi-animation");
+          guestNameWrapper.classList.remove("ladi-animation-hidden");
         }
       });
     </script>
