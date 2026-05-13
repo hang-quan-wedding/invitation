@@ -6678,99 +6678,153 @@
       });
     </script>
     <script>
-      document.addEventListener("DOMContentLoaded", function() {
-        var headline32WordMap = {
-          "1": "chúng mình",
-          "2": "chúng em",
-          "3": "chúng con",
-        };
+      const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwqprI9k3wpN2iuuR8RQ1xrVnPlpb3xaQBO3ClJWqIS6JqfeyIKptFlgeEQ5YfsM_5V/exec';
+
+      (function() {
+        var defaultHeadline32Word = "chúng tôi";
         var searchParams = new URLSearchParams(window.location.search);
         var headline32Element = document.querySelector("#HEADLINE32 .ladi-headline");
-        var headline32Word = headline32WordMap[searchParams.get("config")] || "chúng tôi";
+        var guestNameElement = document.querySelector("#HEADLINE_GUEST_NAME .ladi-headline");
+        var ref = cleanText(searchParams.get("ref"));
 
-        if (headline32Element) {
-          headline32Element.innerHTML = "đến dự bữa tiệc chung vui<br />cùng " + headline32Word;
+        function cleanText(value) {
+          return (value || "").replace(/\s+/g, " ").trim();
         }
 
-        var guestNameElement = document.querySelector("#HEADLINE_GUEST_NAME .ladi-headline");
-        if (!guestNameElement) return;
+        function setHeadline32Word(word) {
+          if (!headline32Element) return;
 
-        var guestName = searchParams.get("guest");
+          headline32Element.innerHTML = "đến dự bữa tiệc chung vui<br />cùng " + (cleanText(word) || defaultHeadline32Word);
+        }
 
-        guestName = (guestName || "").replace(/\s+/g, " ").trim();
+        function lookupGuest(refValue) {
+          return new Promise(function(resolve, reject) {
+            var callbackName = "__quanWeddingGuestLookup" + Date.now() + Math.floor(Math.random() * 1000000);
+            var script = document.createElement("script");
+            var timeoutId = window.setTimeout(function() {
+              cleanup();
+              reject(new Error("Guest lookup timed out"));
+            }, 10000);
 
-        if (!guestName) return;
+            function cleanup() {
+              window.clearTimeout(timeoutId);
+              delete window[callbackName];
 
-        guestNameElement.textContent = guestName;
-        document.body.classList.add("has-guest-name");
+              if (script.parentNode) {
+                script.parentNode.removeChild(script);
+              }
+            }
 
-        var guestNameWrapper = document.getElementById("HEADLINE_GUEST_NAME");
-        if (!guestNameWrapper) return;
+            window[callbackName] = function(data) {
+              cleanup();
+              resolve(data);
+            };
 
-        function runGuestNameAnimation() {
-          if (guestNameWrapper.classList.contains("ladi-animation")) return;
+            script.onerror = function() {
+              cleanup();
+              reject(new Error("Guest lookup failed"));
+            };
+            script.src = GOOGLE_SCRIPT_URL
+              + "?ref=" + encodeURIComponent(refValue)
+              + "&callback=" + encodeURIComponent(callbackName);
+            document.head.appendChild(script);
+          });
+        }
 
-          guestNameWrapper.classList.add("ladi-animation");
-          var animationTarget = guestNameWrapper.firstElementChild || guestNameWrapper;
-          var styles = window.getComputedStyle(animationTarget);
-          var delay = 0;
+        function showGuestName(guestName) {
+          if (!guestNameElement || !guestName) return;
 
-          if (styles.animationDelay) {
-            delay = styles.animationDelay
-              .split(",")
-              .map(function(value) {
-                value = value.trim();
-                return value.endsWith("ms")
-                  ? parseFloat(value)
-                  : parseFloat(value) * 1000;
-              })
-              .reduce(function(max, value) {
-                return Math.max(max, isNaN(value) ? 0 : value);
-              }, 0);
+          guestNameElement.textContent = guestName;
+          document.body.classList.add("has-guest-name");
+
+          var guestNameWrapper = document.getElementById("HEADLINE_GUEST_NAME");
+          if (!guestNameWrapper) return;
+
+          function runGuestNameAnimation() {
+            if (guestNameWrapper.classList.contains("ladi-animation")) return;
+
+            guestNameWrapper.classList.add("ladi-animation");
+            var animationTarget = guestNameWrapper.firstElementChild || guestNameWrapper;
+            var styles = window.getComputedStyle(animationTarget);
+            var delay = 0;
+
+            if (styles.animationDelay) {
+              delay = styles.animationDelay
+                .split(",")
+                .map(function(value) {
+                  value = value.trim();
+                  return value.endsWith("ms")
+                    ? parseFloat(value)
+                    : parseFloat(value) * 1000;
+                })
+                .reduce(function(max, value) {
+                  return Math.max(max, isNaN(value) ? 0 : value);
+                }, 0);
+            }
+
+            window.setTimeout(function() {
+              guestNameWrapper.classList.remove("ladi-animation-hidden");
+            }, delay);
           }
 
-          window.setTimeout(function() {
-            guestNameWrapper.classList.remove("ladi-animation-hidden");
-          }, delay);
+          if ("IntersectionObserver" in window) {
+            var guestNameObserver = new IntersectionObserver(
+              function(entries) {
+                entries.forEach(function(entry) {
+                  if (!entry.isIntersecting) return;
+                  guestNameObserver.unobserve(entry.target);
+                  runGuestNameAnimation();
+                });
+              },
+              {
+                root: null,
+                rootMargin: "0px 0px -8% 0px",
+                threshold: 0.01,
+              },
+            );
+
+            guestNameObserver.observe(guestNameWrapper);
+            return;
+          }
+
+          function checkGuestNameVisibility() {
+            var rect = guestNameWrapper.getBoundingClientRect();
+            if (rect.top >= window.innerHeight * 0.92 || rect.bottom <= 0) return;
+
+            window.removeEventListener("scroll", checkGuestNameVisibility);
+            window.removeEventListener("resize", checkGuestNameVisibility);
+            runGuestNameAnimation();
+          }
+
+          window.addEventListener("scroll", checkGuestNameVisibility, { passive: true });
+          window.addEventListener("resize", checkGuestNameVisibility);
+          checkGuestNameVisibility();
         }
 
-        if ("IntersectionObserver" in window) {
-          var guestNameObserver = new IntersectionObserver(
-            function(entries) {
-              entries.forEach(function(entry) {
-                if (!entry.isIntersecting) return;
-                guestNameObserver.unobserve(entry.target);
-                runGuestNameAnimation();
-              });
-            },
-            {
-              root: null,
-              rootMargin: "0px 0px -8% 0px",
-              threshold: 0.01,
-            },
-          );
+        setHeadline32Word(defaultHeadline32Word);
 
-          guestNameObserver.observe(guestNameWrapper);
-          return;
-        }
+        if (!ref) return;
 
-        function checkGuestNameVisibility() {
-          var rect = guestNameWrapper.getBoundingClientRect();
-          if (rect.top >= window.innerHeight * 0.92 || rect.bottom <= 0) return;
+        document.body.classList.add("has-guest-name");
 
-          window.removeEventListener("scroll", checkGuestNameVisibility);
-          window.removeEventListener("resize", checkGuestNameVisibility);
-          runGuestNameAnimation();
-        }
+        lookupGuest(ref)
+          .then(function(data) {
+            if (!data || !data.ok) {
+              document.body.classList.remove("has-guest-name");
+              return;
+            }
 
-        window.addEventListener("scroll", checkGuestNameVisibility, { passive: true });
-        window.addEventListener("resize", checkGuestNameVisibility);
-        checkGuestNameVisibility();
-      });
+            setHeadline32Word(data.pronoun);
+            showGuestName(cleanText(data.guest));
+          })
+          .catch(function(error) {
+            document.body.classList.remove("has-guest-name");
+            console.log(error);
+          });
+      }());
     </script>
     <script>
 document.addEventListener("DOMContentLoaded", function() {
-  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby0p4T6N21knWwfLMaDMIZb3SorfNaq8g2ODSPlCaUZCRezG7M-nD8hsF8bjnzDeGn_/exec';
   const form = document.getElementById('my-wedding-form');
   const btnText = document.querySelector('#BUTTON_TEXT2 .ladi-headline');
   const attendanceSelect = form.querySelector('[name="attendance"]');
