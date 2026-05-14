@@ -63,6 +63,7 @@ function doGet(e) {
       ref: ref,
       pronoun: guest.pronoun,
       guest: guest.guest,
+      wish: guest.wish,
     });
   } catch (error) {
     return guestLookupResponse_(e, {
@@ -109,6 +110,7 @@ function findGuestByRef_(ref) {
   const idIndex = headers.indexOf('ID');
   const pronounIndex = headers.indexOf('Pronoun');
   const guestIndex = headers.indexOf('Guest');
+  const wishIndex = headers.indexOf('Lời chúc');
 
   if (idIndex === -1 || pronounIndex === -1 || guestIndex === -1) {
     throw new Error('GUESTS sheet must include ID, Pronoun, and Guest headers');
@@ -122,6 +124,7 @@ function findGuestByRef_(ref) {
       return {
         pronoun: String(row[pronounIndex] || '').replace(/\s+/g, ' ').trim(),
         guest: String(row[guestIndex] || '').replace(/\s+/g, ' ').trim(),
+        wish: wishIndex === -1 ? '' : String(row[wishIndex] || '').replace(/\s+/g, ' ').trim(),
       };
     }
   }

@@ -6688,13 +6688,17 @@
       });
     </script>
     <script>
-      const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwqprI9k3wpN2iuuR8RQ1xrVnPlpb3xaQBO3ClJWqIS6JqfeyIKptFlgeEQ5YfsM_5V/exec';
+      const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbytWEqAbUbDCH7OivihpWV6Wq-a_zEewl6suLidcq8Np6We6PNMi-KXoyQKbe0zMowH/exec';
 
       (function() {
         var defaultHeadline32Word = "chúng tôi";
         var searchParams = new URLSearchParams(window.location.search);
         var headline32Element = document.querySelector("#HEADLINE32 .ladi-headline");
+        var headline62Element = document.querySelector("#HEADLINE62 .ladi-headline");
         var guestNameElement = document.querySelector("#HEADLINE_GUEST_NAME .ladi-headline");
+        var paragraph3Element = document.querySelector("#PARAGRAPH3 .ladi-paragraph");
+        var defaultHeadline62Html = headline62Element ? headline62Element.innerHTML : "";
+        var defaultParagraph3Text = paragraph3Element ? paragraph3Element.textContent : "";
         var ref = cleanText(searchParams.get("ref"));
 
         function cleanText(value) {
@@ -6705,6 +6709,27 @@
           if (!headline32Element) return;
 
           headline32Element.innerHTML = "đến dự bữa tiệc chung vui<br />cùng " + (cleanText(word) || defaultHeadline32Word);
+        }
+
+        function replacePronoun(value, pronoun) {
+          return value.replace(/chúng mình/g, (cleanText(pronoun) || "chúng mình").toLowerCase());
+        }
+
+        function setPronounText(pronoun) {
+          if (headline62Element) {
+            headline62Element.innerHTML = replacePronoun(defaultHeadline62Html, pronoun);
+          }
+
+          if (paragraph3Element) {
+            paragraph3Element.textContent = replacePronoun(defaultParagraph3Text, pronoun);
+          }
+        }
+
+        function setParagraph3Wish(wish, pronoun) {
+          var cleanWish = cleanText(wish);
+          if (!paragraph3Element || !cleanWish) return;
+
+          paragraph3Element.textContent = replacePronoun(defaultParagraph3Text, pronoun).replace(/\bbạn\b/g, cleanWish);
         }
 
         function lookupGuest(refValue) {
@@ -6825,6 +6850,8 @@
             }
 
             setHeadline32Word(data.pronoun);
+            setPronounText(data.pronoun);
+            setParagraph3Wish(data.wish, data.pronoun);
             showGuestName(cleanText(data.guest));
           })
           .catch(function(error) {
