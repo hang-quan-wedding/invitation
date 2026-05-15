@@ -6697,8 +6697,22 @@
         var headline62Element = document.querySelector("#HEADLINE62 .ladi-headline");
         var guestNameElement = document.querySelector("#HEADLINE_GUEST_NAME .ladi-headline");
         var paragraph3Element = document.querySelector("#PARAGRAPH3 .ladi-paragraph");
+        var paragraph4Element = document.querySelector("#PARAGRAPH4 .ladi-paragraph");
+        var rsvpNameInput = document.querySelector('#my-wedding-form [name="guest_name"]');
+        var attendancePlaceholder = document.querySelector('#my-wedding-form [name="attendance"] option[value=""]');
+        var attendingOption = document.querySelector('#my-wedding-form [name="attendance"] option[value="attending"]');
+        var notAttendingOption = document.querySelector('#my-wedding-form [name="attendance"] option[value="not_attending"]');
+        var guestCountPlaceholder = document.querySelector('#my-wedding-form [name="guest_count"] option[value=""]');
+        var menuPlaceholder = document.querySelector('#my-wedding-form [name="menu"] option[value=""]');
         var defaultHeadline62Html = headline62Element ? headline62Element.innerHTML : "";
         var defaultParagraph3Text = paragraph3Element ? paragraph3Element.textContent : "";
+        var defaultParagraph4Html = paragraph4Element ? paragraph4Element.innerHTML : "";
+        var defaultNamePlaceholder = rsvpNameInput ? rsvpNameInput.getAttribute("placeholder") || "" : "";
+        var defaultAttendancePlaceholder = attendancePlaceholder ? attendancePlaceholder.textContent : "";
+        var defaultAttendingOptionText = attendingOption ? attendingOption.textContent : "";
+        var defaultNotAttendingOptionText = notAttendingOption ? notAttendingOption.textContent : "";
+        var defaultGuestCountPlaceholder = guestCountPlaceholder ? guestCountPlaceholder.textContent : "";
+        var defaultMenuPlaceholder = menuPlaceholder ? menuPlaceholder.textContent : "";
         var ref = cleanText(searchParams.get("ref"));
 
         function cleanText(value) {
@@ -6712,7 +6726,40 @@
         }
 
         function replacePronoun(value, pronoun) {
-          return value.replace(/chúng mình/g, (cleanText(pronoun) || "chúng mình").toLowerCase());
+          var cleanPronoun = cleanText(pronoun) || "chúng mình";
+
+          return value.replace(/chúng mình/gi, function(match) {
+            return match.charAt(0) === match.charAt(0).toUpperCase()
+              ? capitalizeFirstLetter(cleanPronoun)
+              : cleanPronoun.toLowerCase();
+          });
+        }
+
+        function capitalizeFirstLetter(value) {
+          value = cleanText(value);
+          return value ? value.charAt(0).toUpperCase() + value.slice(1) : value;
+        }
+
+        function replaceGuestWord(value, wish) {
+          var cleanWish = cleanText(wish);
+          if (!value || !cleanWish) return value;
+
+          return value.replace(/bạn/gi, function(match) {
+            return match === match.toUpperCase() || match.charAt(0) === match.charAt(0).toUpperCase()
+              ? capitalizeFirstLetter(cleanWish)
+              : cleanWish;
+          });
+        }
+
+        function replaceSelfWord(value, wish) {
+          var cleanWish = cleanText(wish);
+          if (!value || !cleanWish) return value;
+
+          return value.replace(/mình/gi, function(match) {
+            return match.charAt(0) === match.charAt(0).toUpperCase()
+              ? capitalizeFirstLetter(cleanWish)
+              : cleanWish;
+          });
         }
 
         function setPronounText(pronoun) {
@@ -6730,6 +6777,50 @@
           if (!paragraph3Element || !cleanWish) return;
 
           paragraph3Element.textContent = replacePronoun(defaultParagraph3Text, pronoun).replace(/\bbạn\b/g, cleanWish);
+        }
+
+        function setRsvpGuestName(guestName) {
+          var cleanGuestName = cleanText(guestName);
+          if (!rsvpNameInput || !cleanGuestName) return;
+
+          rsvpNameInput.value = cleanGuestName;
+        }
+
+        function setRsvpWishText(wish, pronoun) {
+          var cleanWish = cleanText(wish);
+          if (!cleanWish) return;
+
+          if (headline62Element) {
+            headline62Element.innerHTML = replaceGuestWord(replacePronoun(defaultHeadline62Html, pronoun), cleanWish);
+          }
+
+          if (rsvpNameInput) {
+            rsvpNameInput.setAttribute("placeholder", replaceGuestWord(defaultNamePlaceholder, cleanWish));
+          }
+
+          if (attendancePlaceholder) {
+            attendancePlaceholder.textContent = replaceGuestWord(defaultAttendancePlaceholder, cleanWish);
+          }
+
+          if (attendingOption) {
+            attendingOption.textContent = replaceSelfWord(defaultAttendingOptionText, cleanWish);
+          }
+
+          if (notAttendingOption) {
+            notAttendingOption.textContent = replaceSelfWord(defaultNotAttendingOptionText, cleanWish);
+          }
+
+          if (guestCountPlaceholder) {
+            guestCountPlaceholder.textContent = replaceGuestWord(defaultGuestCountPlaceholder, cleanWish);
+          }
+
+          if (menuPlaceholder) {
+            menuPlaceholder.textContent = replaceGuestWord(defaultMenuPlaceholder, cleanWish);
+          }
+
+          if (paragraph4Element) {
+            paragraph4Element.innerHTML = replaceGuestWord(replacePronoun(defaultParagraph4Html, pronoun), cleanWish);
+          }
         }
 
         function lookupGuest(refValue) {
@@ -6852,6 +6943,8 @@
             setHeadline32Word(data.pronoun);
             setPronounText(data.pronoun);
             setParagraph3Wish(data.wish, data.pronoun);
+            setRsvpGuestName(data.guest);
+            setRsvpWishText(data.wish, data.pronoun);
             showGuestName(cleanText(data.guest));
           })
           .catch(function(error) {
