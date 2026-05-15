@@ -1,0 +1,173 @@
+[id*="watermark" i][style*="fixed"],
+[class*="watermark" i][style*="fixed"],
+[id*="powered" i][style*="fixed"],
+[class*="powered" i][style*="fixed"],
+[href*="ladipage.com"][style*="fixed"],
+[src*="ladipage"][style*="fixed"] {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+/* ── Gift modal open/close animations ── */
+@keyframes giftModalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.88) translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes giftModalOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.88) translateY(24px);
+  }
+}
+@keyframes giftOverlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes giftOverlayOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Applied when modal is animating in */
+#POPUP2.gift-modal-entering {
+  animation: giftOverlayIn 0.3s ease forwards;
+}
+#POPUP2.gift-modal-entering > .ladi-popup {
+  animation: giftModalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+/* Applied when modal is animating out */
+#POPUP2.gift-modal-leaving {
+  animation: giftOverlayOut 0.25s ease forwards;
+}
+#POPUP2.gift-modal-leaving > .ladi-popup {
+  animation: giftModalOut 0.25s ease forwards;
+}
+
+#BUTTON_OPEN_GIFT {
+  width: 382.078px;
+  height: 40px;
+  top: 510px;
+  left: 18.961px;
+  cursor: pointer;
+}
+#BUTTON_OPEN_GIFT > .ladi-button > .ladi-button-background {
+  background-color: rgba(1, 1, 1, 0);
+}
+#BUTTON_OPEN_GIFT > .ladi-button {
+  border-width: 1px;
+  border-radius: 28px;
+  border-style: solid;
+  border-color: rgb(131, 95, 45);
+  cursor: pointer;
+}
+#BUTTON_OPEN_GIFT > .ladi-button:hover {
+  background-color: rgb(131, 95, 45);
+}
+#BUTTON_OPEN_GIFT:hover #BUTTON_TEXT_OPEN_GIFT > .ladi-headline {
+  color: #fff;
+}
+#BUTTON_TEXT_OPEN_GIFT {
+  width: 380px;
+  top: 9px;
+  left: 0px;
+  pointer-events: none;
+}
+#BUTTON_TEXT_OPEN_GIFT > .ladi-headline {
+  font-family: TESQSTRUJQkMRCUVEY;
+  font-size: 19px;
+  line-height: 1.6;
+  color: rgb(131, 95, 45);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+  transition: color 0.3s;
+}
+
+#SECTION13 {
+  display: none !important;
+}
+
+/* ── Gift modal backdrop overlay ── */
+#gift-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  z-index: 9998;
+  cursor: pointer;
+}
+#gift-overlay.gift-overlay-entering {
+  animation: giftOverlayIn 0.3s ease forwards;
+}
+#gift-overlay.gift-overlay-leaving {
+  animation: giftOverlayOut 0.25s ease forwards;
+}
+
+body.modal-scroll-locked {
+  overflow: hidden !important;
+  touch-action: none;
+}
+#backdrop-popup.thankyou-backdrop {
+  display: block;
+  background: rgba(0, 0, 0, 0.72);
+  animation: giftOverlayIn 0.3s ease forwards;
+}
+#backdrop-popup.thankyou-backdrop-leaving {
+  animation: giftOverlayOut 0.25s ease forwards;
+}
+#POPUP1.thankyou-modal-entering {
+  animation: giftModalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+#POPUP1.thankyou-modal-leaving {
+  animation: giftModalOut 0.25s ease forwards;
+}
+#POPUP1 .ladi-animation > .ladi-group,
+#POPUP1 .ladi-animation > .ladi-headline,
+#POPUP1 .ladi-animation > .ladi-paragraph,
+#POPUP1 .ladi-animation > .ladi-image,
+#POPUP1 .ladi-animation > .ladi-box {
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+}
+#POPUP1 .thankyou-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  z-index: 1000;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  background: transparent;
+  color: rgb(131, 95, 45);
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  font-size: 28px;
+  line-height: 32px;
+  padding: 0;
+  text-align: center;
+}
+#POPUP1 .thankyou-close-btn:hover,
+#POPUP1 .thankyou-close-btn:focus {
+  background: transparent;
+  outline: none;
+}

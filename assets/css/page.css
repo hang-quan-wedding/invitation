@@ -1,0 +1,44 @@
+body {
+  direction: ltr;
+}
+.ladi-wraper {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 420px;
+}
+@font-face {
+  font-family: "TESQSSRUdVTEFSLlRURg";
+  src: url("https://w.ladicdn.com/6322a62f2dad980013bb5005/lora-regular-20250420044709-6d4hn.ttf")
+    format("truetype");
+}
+@font-face {
+  font-family: "VVZOSVDaHVZWxLlRURg";
+  src: url("https://w.ladicdn.com/6322a62f2dad980013bb5005/uvnkechuyen1-20250510115505-nnhje.ttf")
+    format("truetype");
+}
+@font-face {
+  font-family: "MUZUViWSVAtQWxpchlaWEubRm";
+  src: url("https://w.ladicdn.com/6322a62f2dad980013bb5005/1ftv-vip-alisheia-20250219113229-y054f.otf");
+}
+@font-face {
+  font-family: "TESQSNRURJVUuVFRG";
+  src: url("https://w.ladicdn.com/6322a62f2dad980013bb5005/lora-medium-20250409020456-ppcck.ttf")
+    format("truetype");
+}
+@font-face {
+  font-family: "TESQSTRUJQkMRCUVEY";
+  src: url("https://w.ladicdn.com/6322a62f2dad980013bb5005/lora-semibold-20250421105928-zwl-g.ttf")
+    format("truetype");
+}
+@font-face {
+  font-family: "RhJTNJVFlBTkRESElTVEhFUyJVEFMSUMuTRG";
+  src: url("https://w.ladicdn.com/6322a62f2dad980013bb5005/ghiocityanddhisthes-italic-20250429144519-q4ekk.otf");
+}
+@font-face {
+  font-family: "QybWyYWSWmYWLUlZGlbSdGY";
+  src: url("https://w.ladicdn.com/6322a62f2dad980013bb5005/cormorantinfant-medium-20250424145552-1v586.ttf")
+    format("truetype");
+}
+body {
+  font-family: "Open Sans", sans-serif;
+}

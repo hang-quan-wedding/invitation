@@ -1,0 +1,7 @@
+      [style*="source/v3/by/ladipage.svg"],
+      [style*="/by/ladipage.svg"] {
+        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        visibility: hidden !important;
+      }
