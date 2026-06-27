@@ -71,84 +71,6 @@
   });
 })();
 
-// Wheel/scroll blocker used while modal is open
-function _giftBlockScroll(e) {
-  e.preventDefault();
-}
-
-function openGiftModal() {
-  var popup = document.getElementById("POPUP2");
-  var overlay = document.getElementById("gift-overlay");
-  if (!popup) return;
-
-  // Lock scroll on both html and body
-  document.documentElement.style.overflow = "hidden";
-  document.body.style.overflow = "hidden";
-  // Block mouse-wheel / trackpad scroll
-  window.addEventListener("wheel", _giftBlockScroll, { passive: false });
-  // Block touch scroll
-  window.addEventListener("touchmove", _giftBlockScroll, { passive: false });
-
-  // Show overlay
-  overlay.classList.remove("gift-overlay-leaving");
-  overlay.style.display = "block";
-  void overlay.offsetWidth;
-  overlay.classList.add("gift-overlay-entering");
-
-  // Make visible & kick off enter animation
-  popup.classList.remove("gift-modal-leaving");
-  popup.classList.add("selected");
-  popup.style.display = "block";
-  // Force reflow so animation triggers cleanly
-  void popup.offsetWidth;
-  popup.classList.add("gift-modal-entering");
-
-  // Strip ladi-animation-hidden so content is visible
-  popup.querySelectorAll(".ladi-animation-hidden").forEach(function (el) {
-    el.classList.remove("ladi-animation-hidden");
-  });
-}
-
-function closeGiftModal() {
-  var popup = document.getElementById("POPUP2");
-  var overlay = document.getElementById("gift-overlay");
-  if (!popup) return;
-
-  // Kick off leave animation on overlay
-  overlay.classList.remove("gift-overlay-entering");
-  overlay.classList.add("gift-overlay-leaving");
-
-  // Kick off leave animation on modal
-  popup.classList.remove("gift-modal-entering");
-  popup.classList.add("gift-modal-leaving");
-
-  // Hide both after animation completes (longest duration is 0.25s)
-  popup.addEventListener("animationend", function handler(event) {
-    popup.removeEventListener("animationend", handler);
-    popup.classList.remove("selected", "gift-modal-leaving");
-    popup.style.display = "none";
-    overlay.classList.remove("gift-overlay-leaving");
-    overlay.style.display = "none";
-    // Restore scroll
-    document.documentElement.style.overflow = "";
-    document.body.style.overflow = "";
-    // Remove scroll blockers
-    window.removeEventListener("wheel", _giftBlockScroll);
-    window.removeEventListener("touchmove", _giftBlockScroll);
-  });
-}
-
-// Close popup when clicking the overlay or ladi background
-document.addEventListener("click", function (e) {
-  if (
-    e.target.id === "gift-overlay" ||
-    (e.target.classList.contains("ladi-popup-background") &&
-      e.target.closest("#POPUP2"))
-  ) {
-    closeGiftModal();
-  }
-});
-
 function _thankyouBlockScroll(e) {
   e.preventDefault();
 }
@@ -301,7 +223,7 @@ const GOOGLE_SCRIPT_URL =
     if (!headline32Element) return;
 
     headline32Element.innerHTML =
-      "đến dự bữa tiệc chung vui<br />cùng " +
+      "đến dự tiệc báo hỷ<br />cùng " +
       (cleanText(word) || defaultHeadline32Word);
   }
 
